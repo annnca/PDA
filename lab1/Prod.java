@@ -1,25 +1,36 @@
 package l1;
 
 import java.util.Queue;
-import java.util.Random;
 
 public class Prod extends Thread{
-	Queue<Integer> q;
+	private Queue<Integer> q;
 	
-	public Prod(Queue<Integer> q) {
+	public Prod( Queue<Integer> q) {
 		super();
 		this.q = q;
 	}
-	public synchronized void produce(){
-		int x = new Random().nextInt();
-		System.out.println("producer produced "+ x);
-		q.add(x);
+	
+	private void produce(int i){
+		 System.out.println("producer produced " + i);
+         q.add(i);
 	}
-	public void run(){
-		while(true){
-			if(q.size() < Main.maxDim){
-				produce();
-			}
-		}
+
+	public void run() {
+        for (int i = 0; i < 7; i++) {
+            synchronized (q) {
+                while (q.size() == Main.maxDim) {   
+                        System.out.println("Full queue.Producer is waiting...");
+                        try {
+							q.wait();
+						} catch (InterruptedException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}               
+                }
+				produce(i);
+                q.notifyAll();
+            }
+        }
 	}
+
 }
