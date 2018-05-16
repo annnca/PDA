@@ -10,11 +10,11 @@ using namespace std;
 
 __global__ void Floyd(int** graph, int k)
 {
-	int i = threadIdx.x;
-	for(int j = 0; j <= N; j++){
-		if (graph[i][k] + graph[k][j] < graph[i][j])
-			graph[i][j] = graph[i][k] + graph[k][j];
-	}
+	int i = /*blockIdx.x +*/ threadIdx.x;
+	int j = /*blockIdx.y +*/ threadIdx.y;
+
+	if (graph[i][k] + graph[k][j] < graph[i][j])
+		graph[i][j] = graph[i][k] + graph[k][j];
 }
 
 
@@ -36,9 +36,9 @@ int main()
 	cudaMemcpy(d_graph, h_graph, size, cudaMemcpyHostToDevice);
 
 	int numBlocks = 1;
-	dim3 threadsPerBlock(N);
+	dim3 threadsPerBlock(N, N);
 
-	for (int k = 0; k < N; k++) 
+	for (int k = 0; k < N*N; k++) 
 	{
 		Floyd<<<numBlocks, threadsPerBlock>>>(d_graph, k);
 	}
